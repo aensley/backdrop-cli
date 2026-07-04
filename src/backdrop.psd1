@@ -1,5 +1,5 @@
 @{
-  ModuleVersion     = '1.7.0'
+  ModuleVersion     = '1.7.1'
   GUID              = '3D6C8A5B-1F2E-4A0D-9B7C-E6F5D4C3B2A1'
   Author            = 'Andrew Ensley'
   Description       = 'Set a new desktop wallpaper every day from various sources (apod, bing, earth, eo, iotd, natgeo, wmc)'
