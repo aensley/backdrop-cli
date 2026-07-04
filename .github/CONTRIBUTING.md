@@ -21,10 +21,10 @@ npm install
 
 This registers the git hooks via `simple-git-hooks`:
 
-- **pre-commit** - runs Prettier, shfmt, ShellCheck, and the BATS test suite
+- **pre-commit** - runs Prettier, shfmt, ShellCheck, and BATS against the bash implementation, and PSScriptAnalyzer and Pester against the PowerShell implementation
 - **prepare-commit-msg** - launches an interactive conventional commit prompt (`czg`)
 
-You also need [**shellcheck**](https://github.com/koalaman/shellcheck) and [**shfmt**](https://github.com/mvdan/sh) installed locally for the hooks and `npm run lint` / `npm test` to work:
+You also need [**shellcheck**](https://github.com/koalaman/shellcheck) and [**shfmt**](https://github.com/mvdan/sh) installed locally for `npm run lint:sh` / `npm run test:sh` to work:
 
 ```bash
 # Ubuntu/Debian
@@ -34,7 +34,13 @@ sudo apt install shellcheck shfmt
 brew install shellcheck shfmt
 ```
 
-> **Note:** shfmt and ShellCheck only apply to `backdrop.sh`. The PowerShell module (`backdrop.psm1`) is not checked by the pre-commit hook.
+For the PowerShell side, you need [**PowerShell 7+**](https://github.com/PowerShell/PowerShell) (`pwsh`) installed. Then install PSScriptAnalyzer and Pester:
+
+```bash
+npm run install:ps
+```
+
+This is required for `npm run lint:ps` / `npm run test:ps` to work. Since the pre-commit hook runs `npm run lint` and `npm run test` (which cover both implementations), it won't pass without these installed.
 
 ## Commits
 
@@ -46,10 +52,22 @@ npm run commit
 
 ## Testing
 
-To run the full test suite (ShellCheck + BATS):
+To run the full test suite (ShellCheck + BATS, plus Pester for PowerShell):
 
 ```bash
 npm test
+```
+
+To run just one implementation's tests:
+
+```bash
+npm run test:sh
+```
+
+or
+
+```bash
+npm run test:ps
 ```
 
 Tests live in `test/backdrop.bats` and cover the pure and file-I/O functions in `src/backdrop.sh`; things like config read/write, source validation, image dimension detection, wallpaper option selection, metadata read/write, version comparison, and source rotation. Source resolver functions are tested using a stub `curl` script injected via `PATH`. The `_rotation_index` helper takes a unix timestamp as a parameter rather than calling `date`, so rotation tests run without needing to stub `date`; `get_active_source` integration tests stub `date` via `PATH` in the same way as `curl`.
@@ -72,8 +90,22 @@ To check formatting:
 npm run lint
 ```
 
+To check just one implementation:
+
+```bash
+npm run lint:sh
+```
+
+or
+
+```bash
+npm run lint:ps
+```
+
 To auto-fix formatting:
 
 ```bash
 npm run lint:fix
 ```
+
+`lint:ps:fix` uses `Invoke-ScriptAnalyzer -Fix`, which only corrects rules that support automatic fixes (mostly formatting/whitespace). Violations like `PSAvoidUsingCmdletAliases` still need to be fixed by hand; re-run `npm run lint:ps` afterward to see what's left.

@@ -25,7 +25,7 @@ jobs:
         run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:sh
 
       - name: Install ShellCheck v0.11.0
         run: |
@@ -33,7 +33,7 @@ jobs:
           sudo mv shellcheck-v0.11.0/shellcheck /usr/local/bin/shellcheck
 
       - name: Test
-        run: npm test
+        run: npm run test:sh
 
   test-ps:
     name: test (powershell)
@@ -42,23 +42,10 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Install PSScriptAnalyzer and Pester
-        shell: pwsh
-        run: |
-          Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -ErrorAction Stop
-          Install-Module -Name Pester            -Scope CurrentUser -Force -MinimumVersion 5.0 -ErrorAction Stop
+        run: npm run install:ps
 
       - name: Lint
-        shell: pwsh
-        run: |
-          $exclude = @('PSAvoidUsingWriteHost', 'PSUseShouldProcessForStateChangingFunctions')
-          $results = 'src/backdrop.psm1', 'src/install.ps1' | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ -Severity @('Error', 'Warning') -ExcludeRule $exclude }
-          if ($results) {
-            $results | Format-Table RuleName, Severity, Line, Message -AutoSize
-            exit 1
-          }
+        run: npm run lint:ps
 
       - name: Test
-        shell: pwsh
-        run: |
-          $result = Invoke-Pester test/backdrop.tests.ps1 -Output Detailed -PassThru
-          if ($result.FailedCount -gt 0) { exit 1 }
+        run: npm run test:ps
