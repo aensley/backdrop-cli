@@ -3,7 +3,7 @@
 
 #region Module state
 
-$script:Version = '1.6.1'
+$script:Version          = '1.7.0'
 $script:StateDir = Join-Path $env:LOCALAPPDATA 'backdrop'
 $script:ConfigDir = Join-Path $env:APPDATA 'backdrop'
 $script:ConfigFile = Join-Path $script:ConfigDir 'config'

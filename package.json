@@ -1,7 +1,7 @@
 {
   "name": "backdrop",
   "private": true,
-  "version": "1.6.2",
+  "version": "1.7.0",
   "homepage": "https://github.com/aensley/backdrop#readme",
   "bugs": {
     "url": "https://github.com/aensley/backdrop/issues"
