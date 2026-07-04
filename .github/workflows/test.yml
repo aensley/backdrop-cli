@@ -11,7 +11,7 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -25,7 +25,7 @@ jobs:
         run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:sh
 
       - name: Install ShellCheck v0.11.0
         run: |
@@ -33,4 +33,19 @@ jobs:
           sudo mv shellcheck-v0.11.0/shellcheck /usr/local/bin/shellcheck
 
       - name: Test
-        run: npm test
+        run: npm run test:sh
+
+  test-ps:
+    name: test (powershell)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install PSScriptAnalyzer and Pester
+        run: npm run install:ps
+
+      - name: Lint
+        run: npm run lint:ps
+
+      - name: Test
+        run: npm run test:ps

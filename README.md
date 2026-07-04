@@ -14,23 +14,40 @@ Set a new desktop wallpaper every day from various sources.
 
 backdrop fetches a daily image from one of several curated sources and sets it as your desktop wallpaper. It automatically picks the best display mode based on the image dimensions and your screen aspect ratio.
 
-Run it manually or let a systemd timer handle it on a schedule.
+Run it manually or let a background timer handle it on a schedule.
 
 ## Quick Install
+
+### Linux
 
 ```bash
 curl -fsSL https://ensl.ee/backdrop | bash
 ```
 
+### Windows
+
+```powershell
+iex (iwr 'https://ensl.ee/backdrop-w' -UseBasicParsing).Content
+```
+
 ## Requirements
 
-- A supported Linux desktop environment (see below)
+### Linux
+
+- A supported desktop environment (see [Desktop Environments](#desktop-environments) below)
 - `curl`, `python3` (standard on most distros)
 - systemd (for the daily timer)
 
+### Windows
+
+- Windows 10 or later
+- PowerShell 5.1 or later (built-in on Windows 10+)
+
 ## Desktop Environments
 
-backdrop supports the following Desktop Environments.
+**Windows** uses `SystemParametersInfo` (user32.dll) to set the wallpaper, with fill mode stored in the registry under `HKCU:\Control Panel\Desktop`. No additional tools required.
+
+**Linux** supports the following desktop environments:
 
 | Desktop               | Method                        | Notes                                                                           |
 | --------------------- | ----------------------------- | ------------------------------------------------------------------------------- |
@@ -46,7 +63,9 @@ backdrop supports the following Desktop Environments.
 
 ## Installation
 
-Use the [quick install script](#quick-install) or clone the repo and run the installer locally:
+Use the [quick install script](#quick-install) or clone the repo and run the installer locally.
+
+### Linux
 
 ```bash
 git clone https://github.com/aensley/backdrop.git \
@@ -59,15 +78,24 @@ The installer:
 2. Copies `backdrop` to `/usr/local/bin/`
 3. Runs `backdrop enable`, which downloads and installs the systemd unit files and starts the daily timer
 
-### Additional users
+**Additional users:** with `backdrop` already installed system-wide, additional users can enable it for their own login with `backdrop enable`. This downloads the matching systemd unit files from GitHub and installs them into `~/.config/systemd/user/`.
 
-With `backdrop` already installed, additional users can enable it for their login with:
+### Windows
 
-```bash
-backdrop enable
+Clone the repo and run the installer from PowerShell:
+
+```powershell
+git clone https://github.com/aensley/backdrop.git
+cd backdrop/src
+.\install.ps1
 ```
 
-This will download the matching systemd unit files from the matching GitHub release and install them into their own `~/.config/systemd/user/` directory.
+The installer:
+
+1. Copies `backdrop.psm1` and `backdrop.psd1` to the per-user PowerShell modules directory
+2. Runs `backdrop enable`, which registers the scheduled task and applies the wallpaper immediately
+
+The module is auto-imported in every new PowerShell session; no `$PROFILE` changes needed.
 
 ## Usage
 
@@ -75,19 +103,19 @@ This will download the matching systemd unit files from the matching GitHub rele
 backdrop <command>
 ```
 
-| Command                         | Description                                                                  |
-| ------------------------------- | ---------------------------------------------------------------------------- |
-| `status`                        | Show version, active source, last image, and image metadata (default)        |
-| `update [--force]`              | Refresh wallpaper from the active source                                     |
-| `set <source...> [--force]`     | Switch active source(s) and refresh now; use `all` for all sources           |
-| `set-time <HH:MM>`              | Set the daily run time (24-hour); restarts timer if active                   |
-| `set-rotate-interval <minutes>` | Set rotation interval in minutes; 0 to disable                               |
-| `random [--force]`              | Refresh from a randomly chosen source (does not change active)               |
-| `enable`                        | Enable the systemd --user timer; downloads unit files from GitHub if missing |
-| `disable`                       | Disable the systemd --user timer                                             |
-| `upgrade`                       | Check for and install the latest version from GitHub                         |
-| `uninstall`                     | Remove backdrop from this system                                             |
-| `help`                          | Show help                                                                    |
+| Command                         | Description                                                                        |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `status`                        | Show version, active source, last image, and image metadata (default)              |
+| `update [--force]`              | Refresh wallpaper from the active source                                           |
+| `set <source...> [--force]`     | Switch active source(s) and refresh now; use `all` for all sources                 |
+| `set-time <HH:MM>`              | Set the daily run time (24-hour); restarts timer if active                         |
+| `set-rotate-interval <minutes>` | Set rotation interval in minutes; 0 to disable                                     |
+| `random [--force]`              | Refresh from a randomly chosen source (does not change active)                     |
+| `enable`                        | Enable the background timer (Linux: systemd --user timer; Windows: Task Scheduler) |
+| `disable`                       | Disable the background timer                                                       |
+| `upgrade`                       | Check for and install the latest version from GitHub                               |
+| `uninstall`                     | Remove backdrop from this system                                                   |
+| `help`                          | Show help                                                                          |
 
 ## Sources
 
@@ -147,7 +175,12 @@ When rotation is active, the systemd timer fires at the rotation interval instea
 
 ## Configuration
 
-The config file lives at `~/.config/backdrop/config` and is created on first run. You can edit it directly or use the `set` / `set-time` commands.
+The config file is created on first run. You can edit it directly or use the `set` / `set-time` commands.
+
+| Platform | Config file                 | Cached images              |
+| -------- | --------------------------- | -------------------------- |
+| Linux    | `~/.config/backdrop/config` | `~/.local/share/backdrop/` |
+| Windows  | `%APPDATA%\backdrop\config` | `%LOCALAPPDATA%\backdrop\` |
 
 | Key                   | Default              | Description                                                                                                      |
 | --------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -160,12 +193,14 @@ The config file lives at `~/.config/backdrop/config` and is created on first run
 
 ## Uninstallation
 
-```bash
+```
 backdrop uninstall
 ```
 
 To also remove your config and cached wallpapers:
 
-```bash
+```
 backdrop uninstall --purge
 ```
+
+On Linux this removes the script from `/usr/local/bin` and disables the systemd timer. On Windows it unregisters the scheduled task and removes the PowerShell module.
