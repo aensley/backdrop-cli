@@ -353,7 +353,7 @@ function Set-Wallpaper {
 function Invoke-TimerConfig {
   $action = New-ScheduledTaskAction `
     -Execute 'powershell.exe' `
-    -Argument "-NonInteractive -WindowStyle Hidden -Command `"Import-Module backdrop; backdrop update`""
+    -Argument "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command `"Import-Module backdrop; backdrop update`""
 
   if ($script:RotateInterval -gt 0) {
     $timeTrigger = New-ScheduledTaskTrigger -Daily -At '00:00'

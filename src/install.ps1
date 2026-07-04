@@ -54,6 +54,9 @@ try {
 Write-Host "backdrop: installed to $destDir"
 
 # Load the module and enable the scheduled task.
+# Process-scoped so it doesn't touch the system-wide execution policy; it only
+# affects this powershell.exe instance and disappears when it exits.
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 Import-Module (Join-Path $destDir 'backdrop.psm1') -Force
 backdrop enable
 
