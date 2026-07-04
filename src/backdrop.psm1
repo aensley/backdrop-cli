@@ -695,6 +695,7 @@ function Invoke-BackdropUpgrade {
   $tmp = [System.IO.Path]::GetTempFileName()
   try {
     Save-BackdropFile $rawUrl $tmp -TimeoutSec 60
+    Unblock-File $tmp -ErrorAction SilentlyContinue
     Copy-Item $tmp $modPath -Force
     Write-Host "backdrop: upgraded to v$latestVer. Restart PowerShell to use the new version."
   }

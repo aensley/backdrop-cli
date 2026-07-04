@@ -51,6 +51,13 @@ try {
     if ($tmp -and (Test-Path $tmp)) { Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue }
 }
 
+# Files fetched via Invoke-WebRequest carry the Mark of the Web (Zone.Identifier),
+# which NTFS Copy-Item preserves. Under the default RemoteSigned policy, that mark
+# blocks the module from loading in any future session, so strip it here rather
+# than relying on the Bypass override below (which only applies to this process).
+Unblock-File (Join-Path $destDir 'backdrop.psm1') -ErrorAction SilentlyContinue
+Unblock-File (Join-Path $destDir 'backdrop.psd1') -ErrorAction SilentlyContinue
+
 Write-Host "backdrop: installed to $destDir"
 
 # Load the module and enable the scheduled task.
